@@ -1,11 +1,11 @@
 /*
-LogClaw Harvester — Universal Schema Normaliser
-normalizer.go — Enforces the universal LogClaw log schema
+LogClaw Harvester - Universal Schema Normaliser
+normalizer.go - Enforces the universal LogClaw log schema
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
 Purpose : Every collector calls this before publishing. Raw log data
-          from any platform — Windows, Linux, network device — gets
+          from any platform - Windows, Linux, network device - gets
           converted into the universal LogClaw schema. Timestamps are
           forced to UTC. Missing fields get safe defaults. Nothing
           leaves the harvester in a raw or inconsistent format.
@@ -16,7 +16,7 @@ GitHub  : github.com/rayyan-umair/LogClaw
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Part of the NetRaptor ecosystem.
-  No analysis logic here. Normalise and publish — that is all.
+  No analysis logic here. Normalise and publish - that is all.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
 
@@ -32,7 +32,7 @@ import (
 
 // ── MITRE ATT&CK Mappings ─────────────────────────────────────────────────────
 // Maps known Windows Event IDs and Linux log patterns to MITRE techniques.
-// This is the harvester-level mapping — coarse but immediate.
+// This is the harvester-level mapping - coarse but immediate.
 // The Brain refines these further during correlation.
 
 type MITREMapping struct {
@@ -93,25 +93,25 @@ var windowsEventDescriptions = map[int]string{
 // 10 = immediate action required. 0 = informational only.
 
 var windowsEventSeverity = map[int]int{
-	4625: 6,  // Failed logon — medium, pattern-dependent
-	4624: 2,  // Successful logon — low by itself
-	4720: 7,  // Account created — high
-	4726: 7,  // Account deleted — high
-	4728: 8,  // Added to security group — high
-	4732: 7,  // Added to local group — high
-	4776: 5,  // Credential validation — medium
-	4698: 8,  // Scheduled task created — high
-	7045: 9,  // New service installed — critical
-	1102: 10, // Audit log cleared — critical, always
-	4688: 4,  // New process created — low-medium
-	4697: 9,  // Service installed — critical
-	4740: 7,  // Account locked out — high
-	4756: 8,  // Added to universal group — high
-	4767: 5,  // Account unlocked — medium
-	4800: 2,  // Workstation locked — informational
-	4801: 2,  // Workstation unlocked — informational
-	5140: 5,  // Share accessed — medium
-	5145: 4,  // Share access checked — low-medium
+	4625: 6,  // Failed logon - medium, pattern-dependent
+	4624: 2,  // Successful logon - low by itself
+	4720: 7,  // Account created - high
+	4726: 7,  // Account deleted - high
+	4728: 8,  // Added to security group - high
+	4732: 7,  // Added to local group - high
+	4776: 5,  // Credential validation - medium
+	4698: 8,  // Scheduled task created - high
+	7045: 9,  // New service installed - critical
+	1102: 10, // Audit log cleared - critical, always
+	4688: 4,  // New process created - low-medium
+	4697: 9,  // Service installed - critical
+	4740: 7,  // Account locked out - high
+	4756: 8,  // Added to universal group - high
+	4767: 5,  // Account unlocked - medium
+	4800: 2,  // Workstation locked - informational
+	4801: 2,  // Workstation unlocked - informational
+	5140: 5,  // Share accessed - medium
+	5145: 4,  // Share access checked - low-medium
 }
 
 // ── Linux Log Patterns ────────────────────────────────────────────────────────
@@ -233,7 +233,7 @@ type WindowsRawEvent struct {
 }
 
 // NormaliseWindowsEvent converts a raw Windows Event into a universal LogEvent.
-// Called by winrm.go and evtx_fallthrough.go — same schema regardless of source.
+// Called by winrm.go and evtx_fallthrough.go - same schema regardless of source.
 func NormaliseWindowsEvent(raw *WindowsRawEvent) *LogEvent {
 	evt := &LogEvent{
 		EventID:    generateEventID(),
@@ -243,7 +243,7 @@ func NormaliseWindowsEvent(raw *WindowsRawEvent) *LogEvent {
 		RawPayload: raw.RawXML,
 	}
 
-	// Actor — prefer TargetUser for auth events, SubjectUser otherwise
+	// Actor - prefer TargetUser for auth events, SubjectUser otherwise
 	actor := raw.SubjectUser
 	if raw.TargetUser != "" && raw.TargetUser != "-" {
 		actor = raw.TargetUser

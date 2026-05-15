@@ -1,11 +1,11 @@
 """
-LogClaw Brain — Storage Layer
-storage.py — DuckDB schema, queries, Parquet archiving
+LogClaw Brain - Storage Layer
+storage.py - DuckDB schema, queries, Parquet archiving
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
 Purpose : All database operations for the LogClaw brain. Uses DuckDB
-          as the primary local database — fast, embedded, no server
+          as the primary local database - fast, embedded, no server
           required. Historical events are archived to Parquet files
           for long-term storage and efficient querying. Every table
           is defined here. Every query goes through this module.
@@ -46,7 +46,7 @@ SCHEMA_SQL = """
 
 CREATE TABLE IF NOT EXISTS events (
     event_id        VARCHAR PRIMARY KEY,    -- UUID from harvester
-    timestamp       TIMESTAMPTZ NOT NULL,   -- UTC — always UTC
+    timestamp       TIMESTAMPTZ NOT NULL,   -- UTC - always UTC
     platform        VARCHAR NOT NULL,       -- windows | linux | network | file
     source          VARCHAR NOT NULL,       -- hostname or device identifier
     actor           VARCHAR,               -- user / service / IP performing action
@@ -61,15 +61,15 @@ CREATE TABLE IF NOT EXISTS events (
     ingested_at     TIMESTAMPTZ DEFAULT now() -- when brain received this event
 );
 
--- Index for time-range queries — the most common query pattern
+-- Index for time-range queries - the most common query pattern
 CREATE INDEX IF NOT EXISTS idx_events_timestamp
     ON events (timestamp DESC);
 
--- Index for actor-based queries — entity tracking
+-- Index for actor-based queries - entity tracking
 CREATE INDEX IF NOT EXISTS idx_events_actor
     ON events (actor, timestamp DESC);
 
--- Index for source-based queries — per-host analysis
+-- Index for source-based queries - per-host analysis
 CREATE INDEX IF NOT EXISTS idx_events_source
     ON events (source, timestamp DESC);
 
@@ -253,7 +253,7 @@ class Storage:
         log.info(f"[Storage] Database: {self.db_path}")
 
     def _init_sync(self):
-        """Synchronous initialisation — runs in executor."""
+        """Synchronous initialisation - runs in executor."""
         self._conn = duckdb.connect(self.db_path)
         self._conn.execute(SCHEMA_SQL)
         self._conn.commit()
@@ -759,7 +759,7 @@ class Storage:
         status:   str,
         by:       Optional[str] = None,
     ) -> bool:
-        """Update alert status — acknowledge, resolve, or mark false positive."""
+        """Update alert status - acknowledge, resolve, or mark false positive."""
         now = datetime.now(timezone.utc).isoformat()
         if status == "acknowledged":
             sql = "UPDATE alerts SET status=?, acknowledged_by=?, acknowledged_at=? WHERE alert_id=?"

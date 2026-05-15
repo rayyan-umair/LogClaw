@@ -1,16 +1,16 @@
 """
-LogClaw Brain — Correlation Engine
-correlation.py — Sliding window pattern detection and alert generation
+LogClaw Brain - Correlation Engine
+correlation.py - Sliding window pattern detection and alert generation
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
 Purpose : Receives every normalised event and runs it through a set of
           correlation rules within a sliding time window. Detects
-          attack patterns that span multiple events — brute force,
+          attack patterns that span multiple events - brute force,
           lateral movement, privilege escalation chains, persistence
           mechanisms. When a pattern is confirmed it generates a
           structured alert with a 5W+H breakdown and passes it to
-          the alert pipeline. Works alongside the Sigma engine —
+          the alert pipeline. Works alongside the Sigma engine -
           Sigma handles single-event rule matching, this engine
           handles multi-event temporal correlation.
 Contact : rayyanxumair@gmail.com
@@ -227,7 +227,7 @@ class CorrelationRule:
 
 class BruteForceRule(CorrelationRule):
     """
-    Detects brute force attacks — repeated authentication failures
+    Detects brute force attacks - repeated authentication failures
     against the same account within the time window.
     """
     name       = "brute_force"
@@ -284,7 +284,7 @@ class BruteForceRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"Brute Force Attack — {actor}",
+            "title":         f"Brute Force Attack - {actor}",
             "description":   (
                 f"{len(failures)} failed authentication attempts against "
                 f"'{actor}' from {source} within {int(span_secs)}s"
@@ -304,7 +304,7 @@ class BruteForceRule(CorrelationRule):
 
 class CredentialStuffingRule(CorrelationRule):
     """
-    Detects successful authentication following repeated failures —
+    Detects successful authentication following repeated failures -
     a strong indicator of a successful brute force or credential stuffing.
     """
     name       = "credential_stuffing"
@@ -352,7 +352,7 @@ class CredentialStuffingRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"Successful Login After Failures — {actor}",
+            "title":         f"Successful Login After Failures - {actor}",
             "description":   (
                 f"Account '{actor}' had {len(failures)} failed attempts followed "
                 f"by a successful login from {source}. "
@@ -372,7 +372,7 @@ class CredentialStuffingRule(CorrelationRule):
 
 class LateralMovementRule(CorrelationRule):
     """
-    Detects lateral movement — the same actor authenticating to
+    Detects lateral movement - the same actor authenticating to
     multiple distinct hosts within the time window.
     """
     name       = "lateral_movement"
@@ -422,7 +422,7 @@ class LateralMovementRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"Lateral Movement — {actor}",
+            "title":         f"Lateral Movement - {actor}",
             "description":   (
                 f"Actor '{actor}' authenticated to {len(distinct_hosts)} distinct hosts "
                 f"within {int(span_secs)}s: {', '.join(list(distinct_hosts)[:5])}"
@@ -442,7 +442,7 @@ class LateralMovementRule(CorrelationRule):
 
 class PrivilegeEscalationChainRule(CorrelationRule):
     """
-    Detects a privilege escalation chain — a login followed by
+    Detects a privilege escalation chain - a login followed by
     adding the account to an admin group within the window.
     This pattern strongly suggests a compromise in progress.
     """
@@ -478,7 +478,7 @@ class PrivilegeEscalationChainRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"Privilege Escalation Chain — {actor}",
+            "title":         f"Privilege Escalation Chain - {actor}",
             "description":   (
                 f"Actor '{actor}' logged in and was subsequently added to a "
                 f"security group within the correlation window. "
@@ -498,7 +498,7 @@ class PrivilegeEscalationChainRule(CorrelationRule):
 
 class PersistenceInstallRule(CorrelationRule):
     """
-    Detects persistence installation — a new service or scheduled task
+    Detects persistence installation - a new service or scheduled task
     created shortly after an authentication event on the same host.
     """
     name       = "persistence_after_auth"
@@ -542,7 +542,7 @@ class PersistenceInstallRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"Persistence After Auth — {source}",
+            "title":         f"Persistence After Auth - {source}",
             "description":   (
                 f"{persistence_type.title()} on '{source}' followed "
                 f"a recent authentication event. "
@@ -563,8 +563,8 @@ class PersistenceInstallRule(CorrelationRule):
 
 class AuditLogClearedRule(CorrelationRule):
     """
-    Detects audit log clearing — always a critical event.
-    Fired immediately on Event ID 1102 — no window needed.
+    Detects audit log clearing - always a critical event.
+    Fired immediately on Event ID 1102 - no window needed.
     """
     name       = "audit_log_cleared"
     alert_type = "audit_log_cleared"
@@ -587,7 +587,7 @@ class AuditLogClearedRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"Audit Log Cleared — {source}",
+            "title":         f"Audit Log Cleared - {source}",
             "description":   (
                 f"The Windows Security audit log on '{source}' was cleared "
                 f"by '{actor}'. This is a strong indicator of anti-forensic "
@@ -633,7 +633,7 @@ class AfterHoursAuthRule(CorrelationRule):
         # Check if outside business hours
         hour = ts.hour
         if self.business_start <= hour < self.business_end:
-            return None  # Normal business hours — no alert
+            return None  # Normal business hours - no alert
 
         actor  = (
             event.get("entity", {}).get("actor") or
@@ -650,10 +650,10 @@ class AfterHoursAuthRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"After-Hours Authentication — {actor}",
+            "title":         f"After-Hours Authentication - {actor}",
             "description":   (
                 f"Actor '{actor}' authenticated to '{source}' at "
-                f"{ts.strftime('%H:%M')} UTC — outside business hours "
+                f"{ts.strftime('%H:%M')} UTC - outside business hours "
                 f"({self.business_start:02d}:00–{self.business_end:02d}:00)."
             ),
             "actor":         actor,
@@ -702,7 +702,7 @@ class NewDeviceAuthRule(CorrelationRule):
         }
 
         if source in known_sources:
-            return None  # Source is known — no alert
+            return None  # Source is known - no alert
 
         # Only alert if actor has some history
         if len(actor_events) < 5:
@@ -712,7 +712,7 @@ class NewDeviceAuthRule(CorrelationRule):
             "alert_type":    self.alert_type,
             "severity":      self.severity,
             "severity_score": SEVERITY_SCORE[self.severity],
-            "title":         f"Authentication From New Source — {actor}",
+            "title":         f"Authentication From New Source - {actor}",
             "description":   (
                 f"Actor '{actor}' authenticated from a previously unseen "
                 f"source '{source}'. Known sources: "
@@ -757,10 +757,10 @@ class CorrelationEngine:
         self.five_w         = five_w
         self.window_seconds = window_seconds
 
-        # Window buffer — holds recent events for correlation
+        # Window buffer - holds recent events for correlation
         self.buffer = WindowBuffer(window_seconds=window_seconds)
 
-        # Alert deduplicator — 5 minute cooldown per alert type + actor
+        # Alert deduplicator - 5 minute cooldown per alert type + actor
         self.dedup = AlertDeduplicator(cooldown_seconds=300)
 
         # Registered correlation rules
@@ -775,13 +775,13 @@ class CorrelationEngine:
             NewDeviceAuthRule(),
         ]
 
-        # WebSocket broadcast callback — set by ws.py
+        # WebSocket broadcast callback - set by ws.py
         self._broadcast_cb: Optional[Callable] = None
 
         # Alert count for stats
         self._alert_count = 0
 
-        log.info(f"[Correlation] {len(self._rules)} rules loaded — window {window_seconds}s")
+        log.info(f"[Correlation] {len(self._rules)} rules loaded - window {window_seconds}s")
 
     def set_broadcast_callback(self, cb: Callable):
         """Register a callback to broadcast alerts to WebSocket clients."""
@@ -800,9 +800,9 @@ class CorrelationEngine:
 
         Pipeline:
         1. Add event to window buffer
-        2. Run entity engine — update entity state, detect deviations
-        3. Run Sigma rules — single-event rule matching
-        4. Run correlation rules — multi-event temporal patterns
+        2. Run entity engine - update entity state, detect deviations
+        3. Run Sigma rules - single-event rule matching
+        4. Run correlation rules - multi-event temporal patterns
         5. Deduplicate alerts
         6. Persist alerts to storage
         7. Generate 5W+H for each alert
@@ -815,21 +815,21 @@ class CorrelationEngine:
         # Step 1: Add to window buffer
         await self.buffer.add(event)
 
-        # Step 2: Entity engine — deviation alerts
+        # Step 2: Entity engine - deviation alerts
         try:
             entity_alerts = await self.entity_engine.process_event(event)
             all_alerts.extend(entity_alerts)
         except Exception as ex:
             log.error(f"[Correlation] Entity engine error: {ex}")
 
-        # Step 3: Sigma engine — single-event rule matching
+        # Step 3: Sigma engine - single-event rule matching
         try:
             sigma_alerts = await self.sigma_engine.evaluate(event)
             all_alerts.extend(sigma_alerts)
         except Exception as ex:
             log.error(f"[Correlation] Sigma engine error: {ex}")
 
-        # Step 4: Correlation rules — multi-event patterns
+        # Step 4: Correlation rules - multi-event patterns
         for rule in self._rules:
             try:
                 alert = await rule.evaluate(event, self.buffer)
@@ -870,7 +870,7 @@ class CorrelationEngine:
         trigger_event: Dict,
     ) -> Optional[Dict]:
         """
-        Finalise an alert — deduplicate, add 5W+H, persist, broadcast.
+        Finalise an alert - deduplicate, add 5W+H, persist, broadcast.
         Returns the final alert dict or None if deduplicated.
         """
         alert_type = alert_data.get("alert_type", "unknown")

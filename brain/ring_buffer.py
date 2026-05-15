@@ -1,6 +1,6 @@
 """
-LogClaw Brain — In-Memory Ring Buffer
-ring_buffer.py — Live event buffer for real-time streaming
+LogClaw Brain - In-Memory Ring Buffer
+ring_buffer.py - Live event buffer for real-time streaming
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
@@ -38,7 +38,7 @@ class Subscriber:
     A registered listener that receives events as they arrive.
     Used by WebSocket handlers to push events to connected clients.
     Each subscriber has an asyncio Queue so events are never dropped
-    due to slow consumers — the queue absorbs bursts.
+    due to slow consumers - the queue absorbs bursts.
     """
 
     def __init__(
@@ -49,7 +49,7 @@ class Subscriber:
     ):
         self.subscriber_id = subscriber_id
         self.queue         = asyncio.Queue(maxsize=queue_size)
-        self.filter_fn     = filter_fn  # Optional filter — None means receive all
+        self.filter_fn     = filter_fn  # Optional filter - None means receive all
         self.created_at    = datetime.now(timezone.utc)
         self.received      = 0
         self.dropped       = 0
@@ -61,7 +61,7 @@ class Subscriber:
         try:
             return self.filter_fn(event)
         except Exception:
-            return True  # On filter error, include the event — never silently drop
+            return True  # On filter error, include the event - never silently drop
 
     async def push(self, event: Dict):
         """Push an event to this subscriber's queue. Non-blocking."""
@@ -69,7 +69,7 @@ class Subscriber:
             self.queue.put_nowait(event)
             self.received += 1
         except asyncio.QueueFull:
-            # Subscriber is too slow — evict oldest event and push new one
+            # Subscriber is too slow - evict oldest event and push new one
             try:
                 self.queue.get_nowait()
             except asyncio.QueueEmpty:
@@ -120,7 +120,7 @@ class RingBuffer:
         self.total_received = 0
         self.total_evicted  = 0
 
-        log.info(f"[RingBuffer] Initialised — capacity {maxsize}")
+        log.info(f"[RingBuffer] Initialised - capacity {maxsize}")
 
     # ── Write ─────────────────────────────────────────────────────────────────
 
@@ -420,7 +420,7 @@ def filter_windows_events() -> Callable[[Dict], bool]:
 def filter_critical_event_ids() -> Callable[[Dict], bool]:
     """
     Only receive Windows events with critical Event IDs.
-    1102, 7045, 4697, 4720, 4728 — the ones that always matter.
+    1102, 7045, 4697, 4720, 4728 - the ones that always matter.
     """
     critical_ids = {1102, 7045, 4697, 4720, 4728, 4732, 4698}
     def _filter(event: Dict) -> bool:

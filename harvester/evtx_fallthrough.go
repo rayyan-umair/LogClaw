@@ -1,6 +1,6 @@
 /*
-LogClaw Harvester — EVTX File Fallthrough Parser
-evtx_fallthrough.go — Offline Windows Event Log ingestion
+LogClaw Harvester - EVTX File Fallthrough Parser
+evtx_fallthrough.go - Offline Windows Event Log ingestion
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
@@ -97,7 +97,7 @@ type evtxRecord struct {
 	Signature   uint32 // always 0x00002a2a ("**")
 	Size        uint32 // total record size including this header
 	RecordID    uint64 // sequential record identifier
-	TimeCreated uint64 // FILETIME — 100-nanosecond intervals since 1601-01-01
+	TimeCreated uint64 // FILETIME - 100-nanosecond intervals since 1601-01-01
 }
 
 // ── Parsed Event ──────────────────────────────────────────────────────────────
@@ -256,7 +256,7 @@ func parseEVTXRecord(data []byte) (*parsedEVTXEvent, error) {
 	// Reconstruct as readable text for RawPayload
 	evt.RawData = strings.Join(extracted, " | ")
 
-	// Extract Event ID — look for numeric strings near "EventID" or standalone
+	// Extract Event ID - look for numeric strings near "EventID" or standalone
 	evt.EventID = extractEventID(extracted, payload)
 
 	// Extract known fields
@@ -367,7 +367,7 @@ func (r *EVTXReader) parse(ctx context.Context, hostname string) (int, error) {
 		n, err := io.ReadFull(f, chunkBuf)
 		if err != nil {
 			if err == io.EOF || err == io.ErrUnexpectedEOF {
-				break // End of file — normal
+				break // End of file - normal
 			}
 			log.Printf("[EVTX] chunk %d read error: %v", chunkNum, err)
 			break
@@ -434,7 +434,7 @@ func (r *EVTXReader) parseChunk(ctx context.Context, data []byte, hostname strin
 			continue
 		}
 
-		// Skip events with EventID 0 — likely padding or parse failure
+		// Skip events with EventID 0 - likely padding or parse failure
 		if evt.EventID == 0 {
 			offset += int(recordSize)
 			continue
@@ -591,12 +591,12 @@ func (c *EVTXCollector) Start(ctx context.Context, pub *Publisher) error {
 	for _, path := range c.cfg.EVTXPaths {
 		info, err := os.Stat(path)
 		if err != nil {
-			log.Printf("[EVTX] path not found: %s — skipping", path)
+			log.Printf("[EVTX] path not found: %s - skipping", path)
 			continue
 		}
 
 		if info.IsDir() {
-			// Directory mode — watch for new .evtx files
+			// Directory mode - watch for new .evtx files
 			wg.Add(1)
 			go func(dir string) {
 				defer wg.Done()
@@ -606,7 +606,7 @@ func (c *EVTXCollector) Start(ctx context.Context, pub *Publisher) error {
 				}
 			}(path)
 		} else {
-			// Single file mode — parse immediately and finish
+			// Single file mode - parse immediately and finish
 			wg.Add(1)
 			go func(filePath string) {
 				defer wg.Done()

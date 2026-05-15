@@ -255,7 +255,7 @@ AI is NOT required.
 
 When enabled, it acts as:
 
-> a SOC analyst assistant — not a detector
+> a SOC analyst assistant - not a detector
 
 It can:
 

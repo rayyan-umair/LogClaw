@@ -1,12 +1,12 @@
 /*
-LogClaw Harvester — UDP Syslog Listener
-syslog_udp.go — Network device log ingestion via UDP/TCP syslog
+LogClaw Harvester - UDP Syslog Listener
+syslog_udp.go - Network device log ingestion via UDP/TCP syslog
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
 Purpose : Listens for incoming syslog messages on UDP port 514 (and
           optionally TCP). Accepts logs from any syslog-capable device
-          — firewalls, switches, routers, Linux hosts, IoT devices.
+          - firewalls, switches, routers, Linux hosts, IoT devices.
           Detects device type from the sending IP and message format,
           normalises into the universal LogClaw schema, and publishes
           to the ZeroMQ pipe. Handles RFC3164 and RFC5424 formats.
@@ -46,7 +46,7 @@ const (
 // ── RFC3164 / RFC5424 Parser ──────────────────────────────────────────────────
 // Syslog messages arrive in two main formats.
 //
-// RFC3164 (BSD syslog — most network devices):
+// RFC3164 (BSD syslog - most network devices):
 //   <priority>Jan 15 02:33:47 hostname process: message
 //
 // RFC5424 (modern syslog):
@@ -65,7 +65,7 @@ type SyslogMessage struct {
 }
 
 // ParseSyslogMessage parses a raw syslog datagram into a SyslogMessage.
-// Never returns nil — falls back to a raw message on parse failure.
+// Never returns nil - falls back to a raw message on parse failure.
 func ParseSyslogMessage(data string) *SyslogMessage {
 	data = strings.TrimSpace(data)
 	if data == "" {
@@ -101,7 +101,7 @@ func ParseSyslogMessage(data string) *SyslogMessage {
 		return msg
 	}
 
-	// Raw fallback — treat entire remaining string as the message
+	// Raw fallback - treat entire remaining string as the message
 	msg.Format = "raw"
 	msg.Timestamp = time.Now().UTC()
 	msg.Message = data
@@ -132,7 +132,7 @@ func parseRFC3164(data string, msg *SyslogMessage) bool {
 			continue
 		}
 		candidate := data[:len(f)]
-		// RFC3164 has no year — use current year
+		// RFC3164 has no year - use current year
 		yearStr := fmt.Sprintf("%d ", time.Now().Year())
 		t, err := time.Parse("2006 "+f, yearStr+candidate)
 		if err == nil {
@@ -201,7 +201,7 @@ func parseRFC5424(data string, msg *SyslogMessage) bool {
 	msg.Hostname = nilDash(fields[1])
 	msg.AppName = nilDash(fields[2])
 	msg.ProcID = nilDash(fields[3])
-	// fields[4] = msgid, fields[5] = structured data — skip both
+	// fields[4] = msgid, fields[5] = structured data - skip both
 	if len(fields) == 7 {
 		msg.Message = strings.TrimSpace(fields[6])
 	}
@@ -383,7 +383,7 @@ func (l *UDPListener) listen(ctx context.Context) error {
 				return nil
 			}
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				continue // Normal timeout — just loop again
+				continue // Normal timeout - just loop again
 			}
 			log.Printf("[Syslog/UDP] read error: %v", err)
 			continue
@@ -579,7 +579,7 @@ func (c *SyslogCollector) Start(ctx context.Context, pub *Publisher) error {
 	go func() {
 		defer wg.Done()
 		if err := tcpListener.listen(ctx); err != nil {
-			// TCP failure is not fatal — UDP alone is sufficient
+			// TCP failure is not fatal - UDP alone is sufficient
 			log.Printf("[Syslog] TCP listener failed (non-fatal): %v", err)
 		}
 	}()
@@ -587,7 +587,7 @@ func (c *SyslogCollector) Start(ctx context.Context, pub *Publisher) error {
 	wg.Wait()
 	close(errCh)
 
-	// Only return error if UDP failed — TCP is optional
+	// Only return error if UDP failed - TCP is optional
 	for err := range errCh {
 		if strings.Contains(err.Error(), "UDP") {
 			return err

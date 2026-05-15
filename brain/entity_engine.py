@@ -1,6 +1,6 @@
 """
-LogClaw Brain — Entity Intelligence Engine
-entity_engine.py — Behavioural tracking, risk scoring, baseline deviation
+LogClaw Brain - Entity Intelligence Engine
+entity_engine.py - Behavioural tracking, risk scoring, baseline deviation
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
@@ -8,8 +8,8 @@ Purpose : Tracks every actor seen in the logs as a persistent entity.
           An entity is a user account, IP address, hostname, or service.
           For each entity it maintains a behavioural baseline, a risk
           score, an activity timeline, and deviation detection. When an
-          entity behaves outside its normal pattern — logging in at 2AM,
-          accessing a new host, executing an unusual process — the engine
+          entity behaves outside its normal pattern - logging in at 2AM,
+          accessing a new host, executing an unusual process - the engine
           flags it. This is the layer that turns individual log events
           into intelligence about actors over time.
 Contact : rayyanxumair@gmail.com
@@ -58,7 +58,7 @@ ENTITY_TYPE_SERVICE = "service"
 
 # ── Risk Weights ──────────────────────────────────────────────────────────────
 # How much each event type contributes to an entity's risk score.
-# These are additive — multiple events compound.
+# These are additive - multiple events compound.
 
 RISK_WEIGHTS = {
     # Authentication failures
@@ -135,13 +135,13 @@ class EntityState:
         self.tags:     List[str] = []
         self.metadata: Dict[str, Any] = {}
 
-        # Recent activity window — last 100 events for quick access
+        # Recent activity window - last 100 events for quick access
         self.recent_events: deque = deque(maxlen=100)
 
-        # Deviation flags — set when anomalous behaviour detected
+        # Deviation flags - set when anomalous behaviour detected
         self.deviation_flags: Set[str] = set()
 
-        # Stale flag — set if entity hasn't been seen for stale_days
+        # Stale flag - set if entity hasn't been seen for stale_days
         self.is_stale = False
 
     def to_dict(self) -> Dict[str, Any]:
@@ -191,7 +191,7 @@ class EntityState:
 def classify_entity(identifier: str) -> str:
     """
     Determine entity type from the identifier string.
-    Uses pattern matching — IP regex, hostname patterns, service names.
+    Uses pattern matching - IP regex, hostname patterns, service names.
     """
     if not identifier or identifier == "unknown":
         return ENTITY_TYPE_USER
@@ -208,7 +208,7 @@ def classify_entity(identifier: str) -> str:
     if '@' in identifier:
         parts = identifier.split('@')
         if len(parts) == 2 and re.match(r'^\d{1,3}\.\d{1,3}', parts[1]):
-            return ENTITY_TYPE_USER  # user with IP context — classify as user
+            return ENTITY_TYPE_USER  # user with IP context - classify as user
 
     # Known service account patterns
     service_patterns = [
@@ -220,7 +220,7 @@ def classify_entity(identifier: str) -> str:
         if re.search(pattern, identifier, re.IGNORECASE):
             return ENTITY_TYPE_SERVICE
 
-    # Hostname patterns — contains dots or dashes, looks like a FQDN
+    # Hostname patterns - contains dots or dashes, looks like a FQDN
     if '.' in identifier and not identifier.startswith('\\'):
         parts = identifier.split('.')
         if len(parts) >= 2 and all(p for p in parts):
@@ -359,7 +359,7 @@ class EntityEngine:
             elif raw_id == 4624 or (etype == "auth" and "success" in ev.get("description", "").lower()):
                 entity.auth_success_count += 1
 
-                # Successful login after failures — suspicious
+                # Successful login after failures - suspicious
                 if entity.auth_failure_count >= 5:
                     deviations.append({
                         "flag":        "success_after_failures",
@@ -380,7 +380,7 @@ class EntityEngine:
                         RISK_CEILING,
                     )
 
-            # Audit log cleared (Event ID 1102) — always critical
+            # Audit log cleared (Event ID 1102) - always critical
             elif raw_id == 1102:
                 entity.risk_score = min(
                     entity.risk_score + RISK_WEIGHTS["audit_log_cleared"],
@@ -510,7 +510,7 @@ class EntityEngine:
                 "description": ev.get("description", ""),
             })
 
-        # Periodic persist — every 50 events per entity
+        # Periodic persist - every 50 events per entity
         if entity.event_count % 50 == 0:
             await self.storage.upsert_entity(entity.to_dict())
             async with self._lock:
@@ -527,7 +527,7 @@ class EntityEngine:
         threshold:  int = 3,
     ) -> Optional[Dict]:
         """
-        Detect lateral movement — same actor authenticating to multiple
+        Detect lateral movement - same actor authenticating to multiple
         distinct hosts within a short time window.
         Returns an alert dict if detected, None otherwise.
         """
@@ -723,7 +723,7 @@ class EntityEngine:
             "alert_type":    deviation["flag"],
             "severity":      sev_str,
             "severity_score": sev_score,
-            "title":         f"{deviation['flag'].replace('_', ' ').title()} — {entity.entity_id}",
+            "title":         f"{deviation['flag'].replace('_', ' ').title()} - {entity.entity_id}",
             "description":   deviation["description"],
             "actor":         entity.entity_id,
             "target":        event.get("entity", {}).get("target") or event.get("target"),

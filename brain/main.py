@@ -1,6 +1,6 @@
 """
-LogClaw Brain — Intelligence Layer Entry Point
-main.py — FastAPI application, startup, shutdown, route registration
+LogClaw Brain - Intelligence Layer Entry Point
+main.py - FastAPI application, startup, shutdown, route registration
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
@@ -17,7 +17,7 @@ GitHub  : github.com/rayyan-umair/LogClaw
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Part of the NetRaptor ecosystem.
-  All imports at module level — prevents NameError in threaded
+  All imports at module level - prevents NameError in threaded
   callbacks. Never import inside functions or route handlers.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
@@ -48,7 +48,7 @@ from sigma_engine import SigmaEngine
 from five_w import FiveWEngine
 from ingester import Ingester
 
-# API routers — all imported at module level
+# API routers - all imported at module level
 from api.events import router as events_router
 from api.entities import router as entities_router
 from api.alerts import router as alerts_router
@@ -111,25 +111,25 @@ async def lifespan(app: FastAPI):
     # Set log level from config
     logging.getLogger().setLevel(getattr(logging, settings.log_level.upper(), logging.INFO))
 
-    # Initialise storage — creates DuckDB database and all tables
+    # Initialise storage - creates DuckDB database and all tables
     log.info("[Storage] Initialising DuckDB...")
     storage = Storage(settings.db_path)
     await storage.initialise()
     state.storage = storage
     log.info("[Storage] Ready")
 
-    # Initialise ring buffer — in-memory live event store
+    # Initialise ring buffer - in-memory live event store
     ring_buffer = RingBuffer(maxsize=settings.ring_buffer_size)
     state.ring_buffer = ring_buffer
-    log.info(f"[RingBuffer] Initialised — capacity {settings.ring_buffer_size}")
+    log.info(f"[RingBuffer] Initialised - capacity {settings.ring_buffer_size}")
 
-    # Initialise entity engine — tracks actors, hosts, IPs over time
+    # Initialise entity engine - tracks actors, hosts, IPs over time
     entity_engine = EntityEngine(storage=storage)
     await entity_engine.load_state()
     state.entity_engine = entity_engine
     log.info("[EntityEngine] Ready")
 
-    # Initialise Sigma rule engine — loads built-in and community rules
+    # Initialise Sigma rule engine - loads built-in and community rules
     sigma_engine = SigmaEngine(rules_dir=settings.rules_dir)
     await sigma_engine.load_rules()
     state.sigma_engine = sigma_engine
@@ -140,7 +140,7 @@ async def lifespan(app: FastAPI):
     state.five_w = five_w
     log.info("[5W+H] Ready")
 
-    # Initialise correlation engine — sliding window pattern detection
+    # Initialise correlation engine - sliding window pattern detection
     correlation = CorrelationEngine(
         storage=storage,
         entity_engine=entity_engine,
@@ -151,7 +151,7 @@ async def lifespan(app: FastAPI):
     state.correlation = correlation
     log.info(f"[Correlation] Window {settings.correlation_window_seconds}s")
 
-    # Initialise ZeroMQ ingester — receives events from Go harvester
+    # Initialise ZeroMQ ingester - receives events from Go harvester
     ingester = Ingester(
         zmq_address=settings.zmq_address,
         ring_buffer=ring_buffer,
@@ -175,7 +175,7 @@ async def lifespan(app: FastAPI):
     app.state.five_w        = five_w
     app.state.settings      = settings
 
-    log.info("[Brain] All systems online — ready to receive events")
+    log.info("[Brain] All systems online - ready to receive events")
     log.info("━" * 60)
 
     yield  # Application runs here
@@ -206,7 +206,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="LogClaw Brain",
-    description="Local-first telemetry intelligence — LogClaw Intelligence Layer",
+    description="Local-first telemetry intelligence - LogClaw Intelligence Layer",
     version="1.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",

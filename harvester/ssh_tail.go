@@ -1,6 +1,6 @@
 /*
-LogClaw Harvester — Linux Log Collector
-ssh_tail.go — Remote Linux log ingestion via SSH
+LogClaw Harvester - Linux Log Collector
+ssh_tail.go - Remote Linux log ingestion via SSH
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
@@ -49,7 +49,7 @@ var defaultLinuxLogFiles = []string{
 	"/var/log/syslog",          // General system events (Debian/Ubuntu)
 	"/var/log/messages",        // General system events (RHEL/CentOS)
 	"/var/log/kern.log",        // Kernel events
-	"/var/log/audit/audit.log", // Linux audit daemon — highest fidelity
+	"/var/log/audit/audit.log", // Linux audit daemon - highest fidelity
 	"/var/log/cron",            // Scheduled task execution
 	"/var/log/faillog",         // Failed login tracking
 }
@@ -59,8 +59,8 @@ var defaultLinuxLogFiles = []string{
 // We try all of them before falling back to now().
 
 var syslogTimestampFormats = []string{
-	"Jan  2 15:04:05",                     // RFC3164 — single-digit day with space
-	"Jan 02 15:04:05",                     // RFC3164 — zero-padded day
+	"Jan  2 15:04:05",                     // RFC3164 - single-digit day with space
+	"Jan 02 15:04:05",                     // RFC3164 - zero-padded day
 	"2006-01-02T15:04:05.999999999Z07:00", // RFC5424 / ISO8601
 	"2006-01-02T15:04:05Z07:00",
 	time.RFC3339Nano,
@@ -87,17 +87,17 @@ func buildSSHAuth(cfg *Config) ([]ssh.AuthMethod, error) {
 		log.Printf("[SSH] using key authentication: %s", cfg.SSHKeyPath)
 	}
 
-	// Password auth as fallback — not recommended for production
+	// Password auth as fallback - not recommended for production
 	// but needed for lab environments and initial setup
 	if cfg.WinRMPassword != "" {
 		methods = append(methods, ssh.Password(cfg.WinRMPassword))
 		if cfg.SSHKeyPath == "" {
-			log.Println("[SSH] WARNING: using password authentication — key-based auth recommended")
+			log.Println("[SSH] WARNING: using password authentication - key-based auth recommended")
 		}
 	}
 
 	if len(methods) == 0 {
-		return nil, fmt.Errorf("no SSH authentication method configured — provide --ssh-key or --winrm-pass")
+		return nil, fmt.Errorf("no SSH authentication method configured - provide --ssh-key or --winrm-pass")
 	}
 
 	return methods, nil
@@ -137,7 +137,7 @@ func parseSyslogLine(line, sourceHost, logFile string) *LinuxRawEvent {
 	// Field 0 may be the hostname if RFC5424 format
 	fieldIdx := 0
 	if len(fields) > 1 && !strings.Contains(fields[0], ":") {
-		// Skip hostname field — we already know the source host
+		// Skip hostname field - we already know the source host
 		fieldIdx = 1
 	}
 
@@ -163,7 +163,7 @@ func parseSyslogLine(line, sourceHost, logFile string) *LinuxRawEvent {
 // extractSyslogTimestamp attempts to parse a timestamp from the start
 // of a syslog line. Returns the parsed time and the remainder of the line.
 func extractSyslogTimestamp(line string) (time.Time, string) {
-	// Try each format — shortest to longest prefix
+	// Try each format - shortest to longest prefix
 	for _, format := range syslogTimestampFormats {
 		prefixLen := len(format)
 		if len(line) < prefixLen {
@@ -192,7 +192,7 @@ func extractSyslogTimestamp(line string) (time.Time, string) {
 		return t, rest
 	}
 
-	// No timestamp found — use now() and treat entire line as message
+	// No timestamp found - use now() and treat entire line as message
 	return time.Now().UTC(), line
 }
 
@@ -302,7 +302,7 @@ func (ft *FileTailer) tail(ctx context.Context) error {
 	checkSess.Close()
 
 	if exists != "exists" {
-		// File doesn't exist on this host — skip silently
+		// File doesn't exist on this host - skip silently
 		return nil
 	}
 
@@ -382,7 +382,7 @@ func (jt *JournaldTailer) tail(ctx context.Context) error {
 	// Check if journalctl is available
 	checkOut, checkSess, err := jt.session.runCommand("which journalctl 2>/dev/null && echo yes || echo no")
 	if err != nil {
-		return nil // journald not available — not an error
+		return nil // journald not available - not an error
 	}
 	sc := bufio.NewScanner(checkOut)
 	sc.Scan()
@@ -401,7 +401,7 @@ func (jt *JournaldTailer) tail(ctx context.Context) error {
 
 	stdout, session, err := jt.session.runCommand(cmd)
 	if err != nil {
-		return nil // journald available but failed — not fatal
+		return nil // journald available but failed - not fatal
 	}
 	defer session.Close()
 
@@ -512,7 +512,7 @@ func (c *SSHCollector) monitorHost(
 
 		session := newSSHSession(host, 22, sshCfg)
 		if err := session.connect(); err != nil {
-			log.Printf("[SSH] %s: connection failed: %v — retrying in %s", host, err, backoff)
+			log.Printf("[SSH] %s: connection failed: %v - retrying in %s", host, err, backoff)
 			select {
 			case <-ctx.Done():
 				return
@@ -522,7 +522,7 @@ func (c *SSHCollector) monitorHost(
 			}
 		}
 
-		// Connection successful — reset backoff
+		// Connection successful - reset backoff
 		backoff = 5 * time.Second
 
 		// Run all tailers concurrently under a sub-context
@@ -583,14 +583,14 @@ func (c *SSHCollector) monitorHost(
 
 // ── Filter ────────────────────────────────────────────────────────────────────
 // Skip high-volume noise lines that add no security value.
-// Keep this list tight — when in doubt, include the line.
+// Keep this list tight - when in doubt, include the line.
 
 var skipPatterns = []string{
 	"last message repeated",
 	"CRON[",
 	"systemd-logind",
 	"pam_unix(cron",
-	"session opened for user root by (uid=0)", // cron root sessions — noise
+	"session opened for user root by (uid=0)", // cron root sessions - noise
 	"session closed for user root",
 	"ntpd[",
 	"rsyslogd",

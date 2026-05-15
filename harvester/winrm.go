@@ -1,6 +1,6 @@
 /*
-LogClaw Harvester — Windows Event Log Collector
-winrm.go — Remote Windows Event Log ingestion via WinRM
+LogClaw Harvester - Windows Event Log Collector
+winrm.go - Remote Windows Event Log ingestion via WinRM
 
 Author  : Rayyan Umair
 Date    : 2026-05-09
@@ -92,7 +92,7 @@ func buildEventIDFilter() string {
 
 // ── WinRM XML Structures ──────────────────────────────────────────────────────
 // Windows returns events as XML. These structs decode the relevant fields.
-// We only decode what we need — raw XML is preserved in RawPayload.
+// We only decode what we need - raw XML is preserved in RawPayload.
 
 type WinEvent struct {
 	XMLName   xml.Name     `xml:"Event"`
@@ -194,7 +194,7 @@ func (c *WinRMCollector) Start(ctx context.Context, pub *Publisher) error {
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("[WinRM] context cancelled — stopping")
+			log.Println("[WinRM] context cancelled - stopping")
 			return nil
 		case <-ticker.C:
 			c.pollAllHosts(ctx, pub)
@@ -225,7 +225,7 @@ func (c *WinRMCollector) pollHost(ctx context.Context, host string, pub *Publish
 	endpoint := winrm.NewEndpoint(
 		host,
 		c.cfg.WinRMPort,
-		false, // HTTPS — set to true in production with a real cert
+		false, // HTTPS - set to true in production with a real cert
 		false, // insecure skip verify
 		nil,   // CA cert
 		nil,   // client cert
@@ -247,7 +247,7 @@ func (c *WinRMCollector) pollHost(ctx context.Context, host string, pub *Publish
 		}
 		if err := c.pullChannel(ctx, client, host, channel, pub); err != nil {
 			log.Printf("[WinRM] %s/%s: %v", host, channel, err)
-			// Continue to next channel — one failure should not stop others
+			// Continue to next channel - one failure should not stop others
 		}
 	}
 	return nil
@@ -306,12 +306,12 @@ func (c *WinRMCollector) parseAndPublish(
 	for _, block := range eventBlocks {
 		var evt WinEvent
 		if err := xml.Unmarshal([]byte(block), &evt); err != nil {
-			// Log and skip malformed events — never crash on bad input
+			// Log and skip malformed events - never crash on bad input
 			log.Printf("[WinRM] xml parse error on %s/%s: %v", host, channel, err)
 			continue
 		}
 
-		// Parse timestamp — enforce UTC
+		// Parse timestamp - enforce UTC
 		ts, err := parseWindowsTimestamp(evt.System.TimeCreated.SystemTime)
 		if err != nil {
 			ts = time.Now().UTC()

@@ -1,6 +1,6 @@
 """
-LogClaw Brain — Configuration
-config.py — Settings, environment variables, .env file loading
+LogClaw Brain - Configuration
+config.py - Settings, environment variables, .env file loading
 
 Author  : Rayyan Umair
 Date    : 2026-05-12
@@ -8,7 +8,7 @@ Purpose : Centralised configuration for the LogClaw brain. All
           settings are read from environment variables with sensible
           defaults. Supports .env file for local development.
           Every setting is documented. Nothing is hardcoded anywhere
-          else in the codebase — always import from here.
+          else in the codebase - always import from here.
 Contact : rayyanxumair@gmail.com
 GitHub  : github.com/rayyan-umair/LogClaw
 
@@ -76,7 +76,7 @@ class Settings(BaseSettings):
     )
     debug: bool = Field(
         default=False,
-        description="Enable debug mode — verbose logging, auto-reload",
+        description="Enable debug mode - verbose logging, auto-reload",
     )
 
     # ── Server ────────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ class Settings(BaseSettings):
 
     zmq_address: str = Field(
         default="tcp://127.0.0.1:5555",
-        description="ZeroMQ address to subscribe to — must match harvester --zmq flag",
+        description="ZeroMQ address to subscribe to - must match harvester --zmq flag",
     )
     zmq_topic: str = Field(
         default="log:",
@@ -188,11 +188,11 @@ class Settings(BaseSettings):
     )
     ai_model: Optional[str] = Field(
         default=None,
-        description="Model override — uses provider default if not set",
+        description="Model override - uses provider default if not set",
     )
     ai_enabled: bool = Field(
         default=False,
-        description="Master switch for AI features — False means no AI calls at all",
+        description="Master switch for AI features - False means no AI calls at all",
     )
     ai_max_tokens: int = Field(
         default=800,
@@ -226,7 +226,7 @@ class Settings(BaseSettings):
 
     secret_key: str = Field(
         default="change-this-in-production-logclaw-secret-key-2026",
-        description="Secret key for JWT signing — MUST be changed in production",
+        description="Secret key for JWT signing - MUST be changed in production",
     )
     token_expire_hours: int = Field(
         default=24,
@@ -234,7 +234,7 @@ class Settings(BaseSettings):
     )
     allow_anonymous: bool = Field(
         default=True,
-        description="Allow unauthenticated API access — True for local-only deployments",
+        description="Allow unauthenticated API access - True for local-only deployments",
     )
 
     # ── Validators ────────────────────────────────────────────────────────────
@@ -285,7 +285,7 @@ class Settings(BaseSettings):
 
     @property
     def effective_model(self) -> Optional[str]:
-        """Returns the model to use — explicit override or provider default."""
+        """Returns the model to use - explicit override or provider default."""
         if self.ai_model:
             return self.ai_model
         defaults = {
@@ -304,9 +304,9 @@ class Settings(BaseSettings):
 def generate_env_example():
     """Write a .env.example file to the project root."""
     lines = [
-        "# LogClaw Brain — Environment Configuration",
+        "# LogClaw Brain - Environment Configuration",
         "# Copy this file to .env and fill in your values",
-        "# Built by Rayyan Umair — Technology evolves quickly. Responsibility does not.",
+        "# Built by Rayyan Umair - Technology evolves quickly. Responsibility does not.",
         "",
         "# ── Application ──────────────────────────────────────",
         "LOG_LEVEL=INFO",
@@ -346,7 +346,7 @@ def generate_env_example():
         "# OLLAMA_MODEL=llama3",
         "",
         "# ── Security ─────────────────────────────────────────",
-        "# CHANGE THIS in production — use a long random string",
+        "# CHANGE THIS in production - use a long random string",
         "SECRET_KEY=change-this-in-production-logclaw-secret-key-2026",
         "ALLOW_ANONYMOUS=true",
         "",
